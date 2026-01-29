@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>ULTIMATE_HACKER_TERMINAL_V9</title>
+    <style>
+        body { background: #1a1005; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Courier New', monospace; }
+        #screen { width: 95vw; height: 90vh; background: #201405; position: relative; border-radius: 30px; box-shadow: inset 0 0 100px #000, 0 0 40px rgba(255, 176, 0, 0.3); padding: 30px; overflow-y: auto; border: 15px solid #222; box-sizing: border-box; }
+        #screen::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%); background-size: 100% 4px; z-index: 10; pointer-events: none; }
+        #terminal { color: #ffb000; text-shadow: 0 0 8px rgba(255, 176, 0, 0.7); position: relative; z-index: 5; }
+        pre { font-size: 8px; line-height: 8px; color: #ffcc00; margin-bottom: 20px; white-space: pre; }
+        .input-line { display: flex; }
+        #user-input { background: transparent; border: none; color: #ffb000; font-family: inherit; font-size: 1.1rem; outline: none; width: 100%; text-shadow: 0 0 8px #ffb000; }
+        .log-entry { margin: 5px 0; }
+        .cmd-res { color: #fff; }
+        .danger { color: #ff3300; font-weight: bold; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #332200; }
+    </style>
+</head>
+<body>
+
+<div id="screen">
+    <div id="terminal">
+        <pre>
+▓█████  ██▓     ▓█████  ▄████▄   █    ██  ██████      ██████ ▓█████  ▄████▄   ██▀███  ▓█████▄▄▄█████▓
+▓█   ▀ ▓██▒     ▓█   ▀ ▒██▀ ▀█   ██  ▓██▒▒██    ▒    ▒██    ▒ ▓█   ▀ ▒██▀ ▀█  ▓██ ▒ ██▒▓█   ▀▓  ██▒ ▓▒
+▒███   ▒██░     ▒███   ▒▓█    ▄ ▓██  ▒██░░ ▓██▄      ░ ▓██▄   ▒███   ▒▓█    ▄ ▓██ ░▄█ ▒▒███  ▒ ▓██░ ▒░
+▒▓█  ▄ ▒██░     ▒▓█  ▄ ▒▓▓▄ ▄██▒▓▓█  ░██░  ▒   ██▒     ▒   ██▒▒▓█  ▄ ▒▓▓▄ ▄██▒▒██▀▀█▄  ▒▓█  ▄░ ▓██▓ ░ 
+░▒████▒░██████▒░▒████▒▒ ▓███▀ ░▒▒█████▓ ▒██████▒▒    ▒██████▒▒░▒████▒▒ ▓███▀ ░░██▓ ▒██▒░▒████▒ ▒██▒ ░ 
+░░ ▒░ ░░ ▒░▓  ░░░ ▒░ ░░ ░▒ ▒  ░░▒▓▒ ▒ ▒ ▒ ▒▓▒ ▒ ░    ▒ ▒▓▒ ▒ ░░░ ▒░ ░░ ░▒ ▒  ░░ ▒▓ ░▒▓░░░ ▒░ ░ ▒ ░░   
+ ░ ░  ░░ ░ ▒  ░ ░ ░  ░  ░  ▒   ░░▒░ ░ ░ ░ ░▒  ░ ░    ░ ░▒  ░ ░ ░ ░  ░  ░  ▒      ░▒ ░ ▒░ ░ ░  ░   ░      
+   ░     ░ ░      ░    ░          ░░░ ░ ░ ░  ░  ░      ░  ░  ░     ░    ░          ░░   ░    ░    ░      
+   ░  ░    ░  ░   ░    ░░ ░          ░            ░            ░     ░  ░░ ░          ░        ░  ░      
+                       ░                                             ░                                
+        </pre>
+        <div id="history">
+            <div class="log-entry">Sistem hazır. Komut girmek için 'help' yazın.</div>
+        </div>
+        <div class="input-line">
+            <span>root@elecsus:~#&nbsp;</span>
+            <input type="text" id="user-input" autofocus autocomplete="off">
+        </div>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('user-input');
+    const history = document.getElementById('history');
+    const screen = document.getElementById('screen');
+
+    const commands = {
+        "help": "Mevcut komutlar: help, ddos, discord, clear, status, exit",
+        "status": "Sistem Durumu: Çevrimiçi\nBağlantı: Şifreli (AES-256)\nLokasyon: Bilinmiyor",
+        "clear": "clear"
+    };
+
+    input.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+            const val = input.value.toLowerCase().trim();
+            addLog(`root@elecsus:~# ${val}`, "cmd-res");
+            input.value = '';
+
+            if (val === 'help') addLog(commands.help);
+            else if (val === 'status') addLog(commands.status);
+            else if (val === 'clear') history.innerHTML = '';
+            else if (val === 'ddos') await runDDoS();
+            else if (val === 'discord') await runDiscord();
+            else if (val !== '') addLog(`Hata: '${val}' komutu bulunamadı.`, "danger");
+            
+            screen.scrollTop = screen.scrollHeight;
+        }
+    });
+
+    function addLog(text, className = "") {
+        const div = document.createElement('div');
+        div.className = "log-entry " + className;
+        div.innerText = text;
+        history.appendChild(div);
+    }
+
+    async function runDDoS() {
+        addLog("[!] Hedef IP belirleniyor...", "danger");
+        await sleep(1000);
+        for(let i=0; i<5; i++) {
+            addLog(`[UDP_FLOOD] Paket gönderildi: ${Math.floor(Math.random()*999)}KB -> Hedef: 185.122.XX.X`, "danger");
+            await sleep(300);
+            screen.scrollTop = screen.scrollHeight;
+        }
+        addLog("[SUCCESS] Hedef sunucu erişime kapatıldı.");
+    }
+
+    async function runDiscord() {
+        addLog("[*] Discord Gateway'e bağlanılıyor...", "cmd-res");
+        await sleep(1000);
+        addLog("[*] Token sızdırılıyor: NDE4MzI5...");
+        await sleep(800);
+        addLog("[*] Kanal listesi çekiliyor: #genel, #admin, #kayıt");
+        await sleep(500);
+        addLog("[SUCCESS] Discord bot kontrolü ele alındı.", "cmd-res");
+    }
+
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+</script>
+</body>
+</html>
